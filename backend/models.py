@@ -34,6 +34,7 @@ class Ticket(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
 # Reports (join existing issue)
 class Report(db.Model):
     __tablename__ = "reports"
@@ -57,3 +58,29 @@ class TicketUpdate(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
+from sqlalchemy import event, select, func
+
+@event.listens_for(Report, "after_insert")
+def update_ticket_priority(mapper, connection, target):
+    ticket_id = target.ticket_id
+
+    # Count reports using connection (not session)
+    report_count_query = select(func.count()).where(Report.ticket_id == ticket_id)
+    result = connection.execute(report_count_query)
+    report_count = result.scalar()
+
+    # Determine priority
+    if report_count >= 10:
+        new_priority = "HIGH"
+    elif report_count >= 5:
+        new_priority = "MEDIUM"
+    else:
+        new_priority = "LOW"
+
+    # Update ticket directly using connection
+    connection.execute(
+        Ticket.__table__.update()
+        .where(Ticket.id == ticket_id)
+        .values(priority=new_priority)
+    )

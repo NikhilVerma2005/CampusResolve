@@ -123,22 +123,17 @@ def join_ticket(ticket_id):
             description=data["description"]
         )
         db.session.add(report)
-
-        # Count reports
-        report_count = Report.query.filter_by(ticket_id=ticket_id).count() + 1
-
-        # Update priority
-        new_priority = calculate_priority(report_count)
-        ticket.priority = new_priority
-
         db.session.commit()
+
+        report_count = Report.query.filter_by(ticket_id=ticket_id).count()
 
         return jsonify({
             "message": "Joined existing ticket",
             "ticket_id": ticket.id,
-            "new_priority": new_priority,
+            "new_priority": ticket.priority,
             "report_count": report_count
         }), 200
+
 
     except Exception as e:
         db.session.rollback()
