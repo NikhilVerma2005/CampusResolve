@@ -3,6 +3,7 @@ from flask_cors import CORS
 from config import Config
 from models import db, User, Ticket, Report, TicketUpdate
 from routes.tickets import tickets_bp
+from routes.offices import offices_bp
 
 
 def create_app():
@@ -14,6 +15,8 @@ def create_app():
     db.init_app(app)
 
     app.register_blueprint(tickets_bp)
+    app.register_blueprint(offices_bp)
+
 
     with app.app_context():
         db.create_all()
