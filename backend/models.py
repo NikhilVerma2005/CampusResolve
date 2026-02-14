@@ -91,3 +91,16 @@ def update_ticket_priority(mapper, connection, target):
         .where(Ticket.id == ticket_id)
         .values(priority=new_priority)
     )
+
+# --- ticket history ---
+class TicketHistory(db.Model):
+    __tablename__ = "ticket_history"
+
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_id = db.Column(db.Integer, db.ForeignKey("tickets.id"), nullable=False)
+    action = db.Column(db.String(50), nullable=False)  # CREATED, JOINED, STATUS_CHANGED
+    old_status = db.Column(db.String(20), nullable=True)
+    new_status = db.Column(db.String(20), nullable=True)
+    note = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
