@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from models import db, Ticket, Report
 from services.routing import route_ticket
 import re
+from models import TicketHistory
+
 
 tickets_bp = Blueprint("tickets_bp", __name__, url_prefix="/api/tickets")
 
@@ -26,7 +28,15 @@ def create_ticket():
         due_at = due_at
     )
     db.session.add(ticket)
-    db.session.commit()
+    db.session.flush()  # <-- generates ticket.id without committing
+
+    history = TicketHistory(
+    ticket_id=ticket.id,
+    action="CREATED",
+    new_status="OPEN",
+    note="Ticket created by student"
+    )
+    db.session.add(history)
 
     report = Report(
         ticket_id = ticket.id,
@@ -34,6 +44,7 @@ def create_ticket():
         description = description
     )
     db.session.add(report)
+    
     db.session.commit()
 
     return jsonify({
@@ -86,14 +97,6 @@ def suggest_tickets():
 
 # -----join existing ticket----
 
-def calculate_priority(report_count):
-    if report_count >= 10:
-        return "HIGH"
-    elif report_count >= 5:
-        return "MEDIUM"
-    else:
-        return "LOW"
-    
 
 @tickets_bp.route("/<int:ticket_id>/join", methods=["POST"])
 def join_ticket(ticket_id):
@@ -103,8 +106,8 @@ def join_ticket(ticket_id):
     if not ticket:
         return jsonify({"error": "Ticket not found"}), 404
 
-    if ticket.status == "CLOSED":
-        return jsonify({"error": "Cannot join closed ticket"}), 400
+    if ticket.status in ["RESOLVED", "REJECTED"]:
+        return jsonify({"error": "Cannot join finalised ticket"}), 400
 
     # Prevent duplicate join
     existing = Report.query.filter_by(
@@ -116,6 +119,14 @@ def join_ticket(ticket_id):
         return jsonify({"error": "Already joined this ticket"}), 400
 
     try:
+        # Add timelines
+        history = TicketHistory(
+        ticket_id=ticket.id,
+        action="JOINED",
+        note=f"Student {data['student_id']} joined"
+        )
+        db.session.add(history)        
+
         # Add report
         report = Report(
             ticket_id=ticket_id,
@@ -180,6 +191,17 @@ def update_ticket_status(ticket_id):
     ticket.status = new_status
 
     try:
+        old_status = current_status
+
+        history = TicketHistory(
+            ticket_id=ticket.id,
+            action="STATUS_CHANGED",
+            old_status=old_status,
+            new_status=new_status,
+            note=data.get("reason")
+        )
+        db.session.add(history)
+
         db.session.commit()
         return jsonify({
             "message": "Status updated successfully",
@@ -190,3 +212,23 @@ def update_ticket_status(ticket_id):
     except:
         db.session.rollback()
         return jsonify({"error": "Status update failed"}), 500
+
+
+#--- get timeline view api ---
+@tickets_bp.route("/<int:ticket_id>/timeline", methods=["GET"])
+def get_ticket_timeline(ticket_id):
+    history = TicketHistory.query.filter_by(ticket_id=ticket_id)\
+        .order_by(TicketHistory.created_at.asc()).all()
+
+    result = []
+
+    for h in history:
+        result.append({
+            "action": h.action,
+            "old_status": h.old_status,
+            "new_status": h.new_status,
+            "note": h.note,
+            "timestamp": h.created_at.isoformat()
+        })
+
+    return jsonify(result)
