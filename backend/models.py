@@ -33,6 +33,13 @@ class Ticket(db.Model):
     due_at = db.Column(db.DateTime, nullable=False)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    rejection_reason = db.Column(db.Text, nullable=True)
+    last_updated_at = db.Column(
+    db.DateTime,
+    default=datetime.utcnow,
+    onupdate=datetime.utcnow
+)
 
 
 # Reports (join existing issue)
