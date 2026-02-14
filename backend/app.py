@@ -4,6 +4,8 @@ from config import Config
 from models import db, User, Ticket, Report, TicketUpdate
 from routes.tickets import tickets_bp
 from routes.offices import offices_bp
+from routes.users import users_bp
+
 
 
 def create_app():
@@ -16,6 +18,7 @@ def create_app():
 
     app.register_blueprint(tickets_bp)
     app.register_blueprint(offices_bp)
+    app.register_blueprint(users_bp)
 
 
     with app.app_context():
