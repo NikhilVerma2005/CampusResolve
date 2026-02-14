@@ -139,3 +139,54 @@ def join_ticket(ticket_id):
         db.session.rollback()
         return jsonify({"error": "Join failed"}), 500
 
+
+#--- ticket status (open-> in progress/discarded-> resolved)---
+
+@tickets_bp.route("/<int:ticket_id>/status", methods=["PATCH"])
+def update_ticket_status(ticket_id):
+    data = request.get_json()
+
+    if "status" not in data:
+        return jsonify({"error": "New status required"}), 400
+
+    new_status = data["status"]
+
+    ticket = Ticket.query.get(ticket_id)
+    if not ticket:
+        return jsonify({"error": "Ticket not found"}), 404
+
+    current_status = ticket.status
+
+    ALLOWED_TRANSITIONS = {
+        "OPEN": ["IN_PROGRESS", "REJECTED"],
+        "IN_PROGRESS": ["RESOLVED"],
+        "RESOLVED": [],
+        "REJECTED": []
+    }
+
+    # Check if transition is allowed
+    if new_status not in ALLOWED_TRANSITIONS.get(current_status, []):
+        return jsonify({
+            "error": f"Cannot change status from {current_status} to {new_status}"
+        }), 400
+
+    # If rejecting → require reason
+    if new_status == "REJECTED":
+        reason = data.get("reason")
+        if not reason:
+            return jsonify({"error": "Rejection reason required"}), 400
+        ticket.rejection_reason = reason
+
+    ticket.status = new_status
+
+    try:
+        db.session.commit()
+        return jsonify({
+            "message": "Status updated successfully",
+            "ticket_id": ticket.id,
+            "old_status": current_status,
+            "new_status": new_status
+        }), 200
+    except:
+        db.session.rollback()
+        return jsonify({"error": "Status update failed"}), 500
