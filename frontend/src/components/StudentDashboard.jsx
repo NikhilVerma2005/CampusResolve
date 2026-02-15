@@ -5,7 +5,7 @@ import CreateTicketModal from "./CreateTicketModal";
 
 function StudentDashboard() {
   const [showModal, setShowModal] = useState(false);
-  const studentId = 1; // temporary hardcoded
+  const studentId = 2; // temporary hardcoded
 
   return (
     <div style={{ padding: 30 }}>

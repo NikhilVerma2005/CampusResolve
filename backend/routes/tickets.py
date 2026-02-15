@@ -232,3 +232,35 @@ def get_ticket_timeline(ticket_id):
         })
 
     return jsonify(result)
+
+
+# --- top tickets ---
+@tickets_bp.route("/top", methods=["GET"])
+def top_tickets():
+    tickets = Ticket.query.filter(
+        Ticket.status.in_(["OPEN", "IN_PROGRESS"])
+    ).all()
+
+    result = []
+
+    for t in tickets:
+        report_count = Report.query.filter_by(ticket_id=t.id).count()
+        result.append({
+            "ticket_id": t.id,
+            "title": t.title,
+            "priority": t.priority,
+            "status": t.status,
+            "report_count": report_count
+        })
+
+    # Sort by priority then report count
+    priority_order = {"HIGH": 1, "MEDIUM": 2, "LOW": 3}
+
+    result.sort(
+        key=lambda x: (
+            priority_order.get(x["priority"], 99),
+            -x["report_count"]
+        )
+    )
+
+    return jsonify(result[:6])

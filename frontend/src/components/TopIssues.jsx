@@ -5,7 +5,7 @@ function TopIssues() {
   const [tickets, setTickets] = useState([]);
 
   useEffect(() => {
-    API.get("/offices/HOSTEL_OFFICE/tickets")
+    API.get("/tickets/top")
       .then(res => {
         const sorted = res.data
           .sort((a, b) => {
