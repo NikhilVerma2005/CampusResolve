@@ -86,11 +86,16 @@ def office_stats(office_name):
         if t.status in ["OPEN", "IN_PROGRESS"] and t.due_at < now:
             overdue_count += 1
 
+    active_count = open_count + in_progress_count
+    resolution_rate = (resolved_count / total * 100) if total > 0 else 0
+
     return jsonify({
         "total_tickets": total,
         "open": open_count,
         "in_progress": in_progress_count,
         "resolved": resolved_count,
         "rejected": rejected_count,
-        "overdue": overdue_count
+        "overdue": overdue_count,
+        "active": active_count,
+        "resolution_rate": round(resolution_rate, 2)
     })

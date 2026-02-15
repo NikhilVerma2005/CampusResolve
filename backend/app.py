@@ -6,6 +6,7 @@ from routes.tickets import tickets_bp
 from routes.offices import offices_bp
 from routes.users import users_bp
 
+from routes.auth import auth_bp
 
 
 def create_app():
@@ -19,6 +20,7 @@ def create_app():
     app.register_blueprint(tickets_bp)
     app.register_blueprint(offices_bp)
     app.register_blueprint(users_bp)
+    app.register_blueprint(auth_bp)
 
 
     with app.app_context():
