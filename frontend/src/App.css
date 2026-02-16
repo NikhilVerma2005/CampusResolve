@@ -455,3 +455,40 @@ body {
 .suggestion-item:hover {
   background: #dcfce7;
 }
+
+/* ========================= */
+/* SORT BUTTON */
+/* ========================= */
+
+.sort-btn {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid #d1d5db;
+  background: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.sort-btn:hover {
+  background: #f0fdf4;
+  border-color: #10b981;
+  color: #059669;
+}
+
+.sort-arrow {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.sort-arrow.asc {
+  transform: rotate(0deg);
+}
+
+.sort-arrow.desc {
+  transform: rotate(0deg);
+}
