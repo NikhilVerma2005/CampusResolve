@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import API from "../api";
 import TimelineModal from "../components/TimelineModal";
+import "../App.css";
 
 function OfficeDashboard() {
   const [tickets, setTickets] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedTicket, setSelectedTicket] = useState(null); // ✅ Timeline state
+  const [selectedTicket, setSelectedTicket] = useState(null);
 
   const officeName = localStorage.getItem("officeName");
   const role = localStorage.getItem("role");
@@ -23,7 +24,7 @@ function OfficeDashboard() {
       const statsRes = await API.get(`/offices/${officeName}/stats`);
       setStats(statsRes.data || null);
     } catch (err) {
-      console.error("Office fetch error:", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -51,12 +52,11 @@ function OfficeDashboard() {
 
       fetchData();
     } catch (err) {
-      console.error("Status update error:", err);
       alert("Failed to update status");
     }
   };
 
-  if (loading) return <p>Loading office dashboard...</p>;
+  if (loading) return <p style={{ padding: 40 }}>Loading dashboard...</p>;
 
   const pending = tickets.filter(t => t.status === "OPEN");
   const inProgress = tickets.filter(t => t.status === "IN_PROGRESS");
@@ -65,15 +65,16 @@ function OfficeDashboard() {
   );
 
   return (
-    <div style={{ padding: 30 }}>
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <h1>{officeName.replace("_", " ")}</h1>
-          <p>Managing tickets for this office</p>
+    <div className="dashboard-container">
+
+      {/* HEADER */}
+      <div className="dashboard-header">
+        <div className="dashboard-title">
+          {officeName.replace("_", " ")} Office
         </div>
 
         <button
+          className="logout-btn"
           onClick={() => {
             localStorage.clear();
             window.location.href = "/";
@@ -83,49 +84,43 @@ function OfficeDashboard() {
         </button>
       </div>
 
-      {/* Stats Section */}
-      {stats && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-            gap: 20,
-            marginTop: 30,
-            marginBottom: 40
-          }}
-        >
-          <StatCard title="Total Tickets" value={stats.total_tickets} />
-          <StatCard title="Active" value={stats.active} />
-          <StatCard title="Open" value={stats.open} />
-          <StatCard title="In Progress" value={stats.in_progress} />
-          <StatCard title="Resolved" value={stats.resolved} />
-          <StatCard title="Overdue" value={stats.overdue} highlight />
-          <StatCard title="Resolution %" value={`${stats.resolution_rate}%`} />
-        </div>
-      )}
+      <div className="dashboard-wrapper">
 
-      <Section
-        title="Pending Tickets"
-        tickets={pending}
-        updateStatus={updateStatus}
-        openTimeline={setSelectedTicket}
-      />
+        {/* STATS */}
+        {stats && (
+          <div className="stats-row">
+            <StatCard title="Total" value={stats.total_tickets} />
+            <StatCard title="Active" value={stats.active} />
+            <StatCard title="Open" value={stats.open} />
+            <StatCard title="In Progress" value={stats.in_progress} />
+            <StatCard title="Resolved" value={stats.resolved} />
+          </div>
+        )}
 
-      <Section
-        title="In Progress"
-        tickets={inProgress}
-        updateStatus={updateStatus}
-        openTimeline={setSelectedTicket}
-      />
+        {/* SECTIONS */}
+        <Section
+          title="Pending Complaints"
+          tickets={pending}
+          updateStatus={updateStatus}
+          openTimeline={setSelectedTicket}
+        />
 
-      <Section
-        title="Completed"
-        tickets={completed}
-        updateStatus={updateStatus}
-        openTimeline={setSelectedTicket}
-      />
+        <Section
+          title="In Progress"
+          tickets={inProgress}
+          updateStatus={updateStatus}
+          openTimeline={setSelectedTicket}
+        />
 
-      {/* ✅ Timeline Modal */}
+        <Section
+          title="Completed"
+          tickets={completed}
+          updateStatus={updateStatus}
+          openTimeline={setSelectedTicket}
+        />
+
+      </div>
+
       {selectedTicket && (
         <TimelineModal
           ticketId={selectedTicket}
@@ -136,12 +131,18 @@ function OfficeDashboard() {
   );
 }
 
+/* ========================= */
+/* SECTION */
+/* ========================= */
+
 function Section({ title, tickets, updateStatus, openTimeline }) {
   return (
-    <div style={{ marginBottom: 50 }}>
-      <h2>{title}</h2>
+    <div className="section-card">
+      <div className="section-title">{title}</div>
 
-      {tickets.length === 0 && <p>No tickets here.</p>}
+      {tickets.length === 0 && (
+        <p style={{ color: "#6b7280" }}>No complaints here.</p>
+      )}
 
       {tickets.map(t => (
         <TicketCard
@@ -155,55 +156,84 @@ function Section({ title, tickets, updateStatus, openTimeline }) {
   );
 }
 
-function TicketCard({ ticket, updateStatus, openTimeline }) {
-  const overdueStyle = ticket.is_overdue
-    ? { border: "2px solid red", background: "#fff5f5" }
-    : {};
+/* ========================= */
+/* TICKET CARD */
+/* ========================= */
 
+function TicketCard({ ticket, updateStatus, openTimeline }) {
   return (
     <div
       style={{
-        border: "1px solid #ddd",
-        padding: 15,
-        marginBottom: 15,
-        borderRadius: 8,
-        ...overdueStyle
+        background: "white",
+        border: "1px solid #e5e7eb",
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 20,
+        boxShadow: "0 6px 18px rgba(0,0,0,0.05)"
       }}
     >
-      <h3>{ticket.title}</h3>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <h3 style={{ margin: 0 }}>{ticket.title}</h3>
 
-      <Badge label={ticket.priority} type="priority" />
-      <Badge label={ticket.status} type="status" />
+        <div>
+          <Badge label={ticket.priority} type="priority" />
+          <Badge label={ticket.status} type="status" />
+        </div>
+      </div>
 
-      <p><strong>Location:</strong> {ticket.location}</p>
-      <p><strong>Reports:</strong> {ticket.report_count}</p>
+      <p style={{ marginTop: 10 }}>
+        <strong>Location:</strong> {ticket.location}
+      </p>
+
+      <p>
+        <strong>Reports:</strong> {ticket.report_count}
+      </p>
 
       {ticket.is_overdue && (
-        <p style={{ color: "red", fontWeight: "bold" }}>
+        <p style={{ color: "red", fontWeight: 600 }}>
           ⚠ Overdue
         </p>
       )}
 
-      <div style={{ marginTop: 10 }}>
-        <button onClick={() => openTimeline(ticket.ticket_id)}>
-          View Timeline
+      <div style={{ marginTop: 15, display: "flex", gap: 10 }}>
+        <button
+          className="secondary-btn"
+          onClick={() => openTimeline(ticket.ticket_id)}
+        >
+          Timeline
         </button>
-      </div>
 
-      <div style={{ marginTop: 10 }}>
         {ticket.status === "OPEN" && (
           <>
-            <button onClick={() => updateStatus(ticket.ticket_id, "IN_PROGRESS")}>
-              Mark In Progress
-            </button>{" "}
-            <button onClick={() => updateStatus(ticket.ticket_id, "REJECTED")}>
+            <button
+              className="primary-btn"
+              onClick={() => updateStatus(ticket.ticket_id, "IN_PROGRESS")}
+            >
+              Start
+            </button>
+
+            <button
+              style={{
+                padding: "12px 20px",
+                borderRadius: 12,
+                border: "none",
+                background: "#ef4444",
+                color: "white",
+                fontWeight: 600,
+                cursor: "pointer"
+              }}
+              onClick={() => updateStatus(ticket.ticket_id, "REJECTED")}
+            >
               Reject
             </button>
           </>
         )}
 
         {ticket.status === "IN_PROGRESS" && (
-          <button onClick={() => updateStatus(ticket.ticket_id, "RESOLVED")}>
+          <button
+            className="primary-btn"
+            onClick={() => updateStatus(ticket.ticket_id, "RESOLVED")}
+          >
             Mark Resolved
           </button>
         )}
@@ -212,46 +242,48 @@ function TicketCard({ ticket, updateStatus, openTimeline }) {
   );
 }
 
-function StatCard({ title, value, highlight }) {
+/* ========================= */
+/* STAT CARD */
+/* ========================= */
+
+function StatCard({ title, value }) {
   return (
-    <div
-      style={{
-        padding: 20,
-        borderRadius: 10,
-        background: highlight ? "#ffe6e6" : "#f5f5f5",
-        border: highlight ? "2px solid red" : "1px solid #ddd"
-      }}
-    >
-      <h4>{title}</h4>
-      <h2>{value ?? 0}</h2>
+    <div className="stat-card-fixed">
+      <div className="stat-title-fixed">{title}</div>
+      <div className="stat-number-fixed">{value ?? 0}</div>
     </div>
   );
 }
 
+/* ========================= */
+/* BADGE */
+/* ========================= */
+
 function Badge({ label, type }) {
-  let color = "#888";
+  let bg = "#9ca3af";
 
   if (type === "priority") {
-    if (label === "HIGH") color = "red";
-    else if (label === "MEDIUM") color = "orange";
-    else color = "gray";
+    if (label === "HIGH") bg = "#ef4444";
+    else if (label === "MEDIUM") bg = "#f59e0b";
+    else bg = "#6b7280";
   }
 
   if (type === "status") {
-    if (label === "OPEN") color = "orange";
-    else if (label === "IN_PROGRESS") color = "blue";
-    else if (label === "RESOLVED") color = "green";
-    else if (label === "REJECTED") color = "red";
+    if (label === "OPEN") bg = "#f59e0b";
+    else if (label === "IN_PROGRESS") bg = "#3b82f6";
+    else if (label === "RESOLVED") bg = "#10b981";
+    else if (label === "REJECTED") bg = "#ef4444";
   }
 
   return (
     <span
       style={{
-        padding: "5px 10px",
-        borderRadius: 5,
-        backgroundColor: color,
-        color: "#fff",
-        marginRight: 10,
+        background: bg,
+        color: "white",
+        padding: "6px 12px",
+        borderRadius: 8,
+        fontSize: 12,
+        marginLeft: 8
       }}
     >
       {label}
