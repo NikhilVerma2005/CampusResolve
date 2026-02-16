@@ -89,11 +89,31 @@ function OfficeDashboard() {
         {/* STATS */}
         {stats && (
           <div className="stats-row">
-            <StatCard title="Total" value={stats.total_tickets} />
-            <StatCard title="Active" value={stats.active} />
-            <StatCard title="Open" value={stats.open} />
-            <StatCard title="In Progress" value={stats.in_progress} />
-            <StatCard title="Resolved" value={stats.resolved} />
+            <StatCard
+              title="Total Complaints"
+              value={stats.total_tickets}
+              color="#10b981"
+            />
+            <StatCard
+              title="Active"
+              value={stats.active}
+              color="#3b82f6"
+            />
+            <StatCard
+              title="Pending"
+              value={stats.open}
+              color="#f59e0b"
+            />
+            <StatCard
+              title="In Progress"
+              value={stats.in_progress}
+              color="#6366f1"
+            />
+            <StatCard
+              title="Resolved"
+              value={stats.resolved}
+              color="#059669"
+            />
           </div>
         )}
 
@@ -166,10 +186,10 @@ function TicketCard({ ticket, updateStatus, openTimeline }) {
       style={{
         background: "white",
         border: "1px solid #e5e7eb",
-        borderRadius: 16,
-        padding: 20,
-        marginBottom: 20,
-        boxShadow: "0 6px 18px rgba(0,0,0,0.05)"
+        borderRadius: 18,
+        padding: 24,
+        marginBottom: 24,
+        boxShadow: "0 8px 24px rgba(0,0,0,0.06)"
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -181,21 +201,35 @@ function TicketCard({ ticket, updateStatus, openTimeline }) {
         </div>
       </div>
 
-      <p style={{ marginTop: 10 }}>
+      <p style={{ marginTop: 12 }}>
         <strong>Location:</strong> {ticket.location}
       </p>
 
-      <p>
+      {/* ✅ Always show description section */}
+      <div style={{
+        marginTop: 12,
+        padding: 12,
+        background: "#f9fafb",
+        borderRadius: 12,
+        border: "1px solid #e5e7eb"
+      }}>
+        <strong>Description:</strong>
+        <p style={{ marginTop: 6, color: "#374151" }}>
+          {ticket.description ? ticket.description : "No description provided"}
+        </p>
+      </div>
+
+      <p style={{ marginTop: 12 }}>
         <strong>Reports:</strong> {ticket.report_count}
       </p>
 
       {ticket.is_overdue && (
-        <p style={{ color: "red", fontWeight: 600 }}>
+        <p style={{ color: "#ef4444", fontWeight: 600 }}>
           ⚠ Overdue
         </p>
       )}
 
-      <div style={{ marginTop: 15, display: "flex", gap: 10 }}>
+      <div style={{ marginTop: 18, display: "flex", gap: 12 }}>
         <button
           className="secondary-btn"
           onClick={() => openTimeline(ticket.ticket_id)}
@@ -214,7 +248,7 @@ function TicketCard({ ticket, updateStatus, openTimeline }) {
 
             <button
               style={{
-                padding: "12px 20px",
+                padding: "12px 22px",
                 borderRadius: 12,
                 border: "none",
                 background: "#ef4444",
@@ -242,14 +276,28 @@ function TicketCard({ ticket, updateStatus, openTimeline }) {
   );
 }
 
+
 /* ========================= */
 /* STAT CARD */
 /* ========================= */
 
-function StatCard({ title, value }) {
+function StatCard({ title, value, color }) {
   return (
     <div className="stat-card-fixed">
-      <div className="stat-title-fixed">{title}</div>
+      <div className="stat-top-row">
+        <div className="stat-title-fixed">{title}</div>
+
+        <div
+          className="stat-circle"
+          style={{ borderColor: color }}
+        >
+          <div
+            className="stat-dot"
+            style={{ background: color }}
+          ></div>
+        </div>
+      </div>
+
       <div className="stat-number-fixed">{value ?? 0}</div>
     </div>
   );

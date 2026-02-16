@@ -25,7 +25,12 @@ def get_office_tickets(office_name):
     result = []
 
     for t in tickets:
-        report_count = Report.query.filter_by(ticket_id=t.id).count()
+        # Get ALL reports for this ticket
+        reports = Report.query.filter_by(ticket_id=t.id).all()
+        report_count = len(reports)
+
+        # Take the first report description (original complaint)
+        description = reports[0].description if reports else ""
 
         remaining_seconds = (t.due_at - now).total_seconds()
         remaining_hours = round(remaining_seconds / 3600, 2)
@@ -33,6 +38,7 @@ def get_office_tickets(office_name):
         result.append({
             "ticket_id": t.id,
             "title": t.title,
+            "description": description,   # ✅ ADDED
             "location": t.location,
             "priority": t.priority,
             "status": t.status,
@@ -51,6 +57,7 @@ def get_office_tickets(office_name):
     )
 
     return jsonify(result)
+
 
 
 # ------------------ GET OFFICE STATS ------------------
