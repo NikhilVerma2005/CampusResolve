@@ -14,16 +14,19 @@ PRIORITY_ORDER = {
     "LOW": 3
 }
 
+
+# ------------------ GET OFFICE TICKETS ------------------
+
 @offices_bp.route("/<office_name>/tickets", methods=["GET"])
 def get_office_tickets(office_name):
     tickets = Ticket.query.filter_by(office=office_name).all()
+    now = datetime.utcnow()
 
     result = []
 
     for t in tickets:
         report_count = Report.query.filter_by(ticket_id=t.id).count()
 
-        now = datetime.utcnow()
         remaining_seconds = (t.due_at - now).total_seconds()
         remaining_hours = round(remaining_seconds / 3600, 2)
 
@@ -39,7 +42,7 @@ def get_office_tickets(office_name):
             "is_overdue": remaining_seconds < 0
         })
 
-    # Sort properly
+    # Sort by priority then SLA
     result.sort(
         key=lambda x: (
             PRIORITY_ORDER.get(x["priority"], 99),
@@ -50,20 +53,11 @@ def get_office_tickets(office_name):
     return jsonify(result)
 
 
-from flask import Blueprint, jsonify
-from models import Ticket
-from datetime import datetime
-
-offices_bp = Blueprint(
-    "offices_bp",
-    __name__,
-    url_prefix="/api/offices"
-)
+# ------------------ GET OFFICE STATS ------------------
 
 @offices_bp.route("/<office_name>/stats", methods=["GET"])
 def office_stats(office_name):
     tickets = Ticket.query.filter_by(office=office_name).all()
-
     now = datetime.utcnow()
 
     total = len(tickets)

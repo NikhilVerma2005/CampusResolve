@@ -70,7 +70,7 @@ function Signup() {
               <option value="">Select Office</option>
               <option value="HOSTEL_OFFICE">Hostel Office</option>
               <option value="ACADEMIC_OFFICE">Academic Office</option>
-              <option value="FACILITIES_OFFICE">Facilities Office</option>
+              <option value="CAMPUS_FACILITIES">Campus Facilities</option>
               <option value="GENERAL_ADMIN">General Admin</option>
             </select>
             <br /><br />

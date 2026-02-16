@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import API from "../api";
+import TimelineModal from "../components/TimelineModal";
 
 function OfficeDashboard() {
   const [tickets, setTickets] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedTicket, setSelectedTicket] = useState(null); // ✅ Timeline state
 
   const officeName = localStorage.getItem("officeName");
   const role = localStorage.getItem("role");
 
-  // 🔒 Route Protection
   if (!officeName || role !== "STAFF") {
     return <p>Unauthorized. Please login as staff.</p>;
   }
@@ -68,7 +69,7 @@ function OfficeDashboard() {
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <h1>{officeName.replace("_", " ")} Dashboard</h1>
+          <h1>{officeName.replace("_", " ")}</h1>
           <p>Managing tickets for this office</p>
         </div>
 
@@ -103,14 +104,39 @@ function OfficeDashboard() {
         </div>
       )}
 
-      <Section title="Pending Tickets" tickets={pending} updateStatus={updateStatus} />
-      <Section title="In Progress" tickets={inProgress} updateStatus={updateStatus} />
-      <Section title="Completed" tickets={completed} updateStatus={updateStatus} />
+      <Section
+        title="Pending Tickets"
+        tickets={pending}
+        updateStatus={updateStatus}
+        openTimeline={setSelectedTicket}
+      />
+
+      <Section
+        title="In Progress"
+        tickets={inProgress}
+        updateStatus={updateStatus}
+        openTimeline={setSelectedTicket}
+      />
+
+      <Section
+        title="Completed"
+        tickets={completed}
+        updateStatus={updateStatus}
+        openTimeline={setSelectedTicket}
+      />
+
+      {/* ✅ Timeline Modal */}
+      {selectedTicket && (
+        <TimelineModal
+          ticketId={selectedTicket}
+          close={() => setSelectedTicket(null)}
+        />
+      )}
     </div>
   );
 }
 
-function Section({ title, tickets, updateStatus }) {
+function Section({ title, tickets, updateStatus, openTimeline }) {
   return (
     <div style={{ marginBottom: 50 }}>
       <h2>{title}</h2>
@@ -118,13 +144,18 @@ function Section({ title, tickets, updateStatus }) {
       {tickets.length === 0 && <p>No tickets here.</p>}
 
       {tickets.map(t => (
-        <TicketCard key={t.ticket_id} ticket={t} updateStatus={updateStatus} />
+        <TicketCard
+          key={t.ticket_id}
+          ticket={t}
+          updateStatus={updateStatus}
+          openTimeline={openTimeline}
+        />
       ))}
     </div>
   );
 }
 
-function TicketCard({ ticket, updateStatus }) {
+function TicketCard({ ticket, updateStatus, openTimeline }) {
   const overdueStyle = ticket.is_overdue
     ? { border: "2px solid red", background: "#fff5f5" }
     : {};
@@ -153,22 +184,30 @@ function TicketCard({ ticket, updateStatus }) {
         </p>
       )}
 
-      {ticket.status === "OPEN" && (
-        <>
-          <button onClick={() => updateStatus(ticket.ticket_id, "IN_PROGRESS")}>
-            Mark In Progress
-          </button>{" "}
-          <button onClick={() => updateStatus(ticket.ticket_id, "REJECTED")}>
-            Reject
-          </button>
-        </>
-      )}
-
-      {ticket.status === "IN_PROGRESS" && (
-        <button onClick={() => updateStatus(ticket.ticket_id, "RESOLVED")}>
-          Mark Resolved
+      <div style={{ marginTop: 10 }}>
+        <button onClick={() => openTimeline(ticket.ticket_id)}>
+          View Timeline
         </button>
-      )}
+      </div>
+
+      <div style={{ marginTop: 10 }}>
+        {ticket.status === "OPEN" && (
+          <>
+            <button onClick={() => updateStatus(ticket.ticket_id, "IN_PROGRESS")}>
+              Mark In Progress
+            </button>{" "}
+            <button onClick={() => updateStatus(ticket.ticket_id, "REJECTED")}>
+              Reject
+            </button>
+          </>
+        )}
+
+        {ticket.status === "IN_PROGRESS" && (
+          <button onClick={() => updateStatus(ticket.ticket_id, "RESOLVED")}>
+            Mark Resolved
+          </button>
+        )}
+      </div>
     </div>
   );
 }
