@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import API from "../api";
+import "../App.css";
 
 function CreateTicketModal({ studentId, close }) {
   const [title, setTitle] = useState("");
@@ -8,9 +9,12 @@ function CreateTicketModal({ studentId, close }) {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 🔥 Live Suggestions
+  /* ========================= */
+  /* LIVE SUGGESTIONS */
+  /* ========================= */
+
   useEffect(() => {
-    if (!title.trim() || !location) {
+    if (!title || !location) {
       setSuggestions([]);
       return;
     }
@@ -31,92 +35,85 @@ function CreateTicketModal({ studentId, close }) {
     fetchSuggestions();
   }, [title, location]);
 
-  // ✅ Create New Ticket
+  /* ========================= */
+  /* CREATE NEW */
+  /* ========================= */
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!title || !location || !description) {
-      alert("All fields are required");
-      return;
-    }
+    setLoading(true);
 
     try {
-      setLoading(true);
       await API.post("/tickets", {
         title,
         location,
         description,
         student_id: studentId,
       });
+
       close();
     } catch (err) {
-      console.error(err);
-      alert("Error creating ticket");
+      alert("Failed to submit complaint");
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔵 Join Existing Issue
+  /* ========================= */
+  /* JOIN EXISTING */
+  /* ========================= */
+
   const handleJoin = async (ticketId) => {
     try {
       await API.post(`/tickets/${ticketId}/join`, {
         student_id: studentId,
-        description: description || "Joining existing issue",
+        description: description || "Joined existing complaint",
       });
+
+      alert("Successfully joined existing complaint");
       close();
     } catch (err) {
-      console.error(err);
-      alert("Error joining issue");
+      alert(err.response?.data?.error || "Join failed");
     }
   };
 
   return (
-    <>
-      {/* Background Overlay */}
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          backgroundColor: "rgba(0,0,0,0.5)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 1000,
-        }}
-      >
-        {/* Modal Box */}
-        <div
-          style={{
-            width: "500px",
-            background: "#fff",
-            padding: 25,
-            borderRadius: 10,
-            maxHeight: "90vh",
-            overflowY: "auto",
-          }}
-        >
-          <h2>Create New Ticket</h2>
+    <div className="modal-overlay">
+      <div className="modal-card-advanced">
 
-          <form onSubmit={handleSubmit}>
-            {/* Title */}
+        {/* HEADER */}
+        <div className="modal-header">
+          <div>
+            <h2 className="modal-title">Raise a Complaint</h2>
+            <p className="modal-description">
+              You can join an existing complaint if similar.
+            </p>
+          </div>
+          <button className="modal-close" onClick={close}>✕</button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+
+          {/* TITLE */}
+          <div className="form-group">
+            <label>Complaint Title *</label>
             <input
-              placeholder="Issue Title"
+              className="form-input"
+              placeholder="e.g., WiFi not working"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              style={{ width: "100%", padding: 8 }}
+              required
             />
-            <br />
-            <br />
+          </div>
 
-            {/* Location Dropdown */}
+          {/* LOCATION */}
+          <div className="form-group">
+            <label>Location *</label>
             <select
+              className="form-input"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              style={{ width: "100%", padding: 8 }}
+              required
             >
               <option value="">Select Location</option>
               <option value="Hostel 1">Hostel 1</option>
@@ -126,75 +123,80 @@ function CreateTicketModal({ studentId, close }) {
               <option value="Library">Library</option>
               <option value="Auditorium">Auditorium</option>
             </select>
-            <br />
-            <br />
+          </div>
 
-            {/* Description */}
+          {/* DESCRIPTION */}
+          <div className="form-group">
+            <label>Description *</label>
             <textarea
-              placeholder="Describe the issue..."
+              className="form-textarea"
+              placeholder="Describe your complaint..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              style={{ width: "100%", padding: 8 }}
+              required
             />
-            <br />
-            <br />
+          </div>
 
-            <button type="submit" disabled={loading}>
-              {loading ? "Submitting..." : "Submit"}
-            </button>
-            <button
-              type="button"
-              onClick={close}
-              style={{ marginLeft: 10 }}
-            >
-              Cancel
-            </button>
-          </form>
-
-          {/* Suggestions Section */}
+          {/* SUGGESTIONS WITH JOIN */}
           {suggestions.length > 0 && (
             <div
               style={{
-                marginTop: 25,
-                borderTop: "1px solid #ddd",
-                paddingTop: 15,
+                marginTop: 20,
+                maxHeight: 180,
+                overflowY: "auto",
+                border: "1px solid #e5e7eb",
+                borderRadius: 14,
+                padding: 15,
+                background: "#f9fafb"
               }}
             >
-              <h3>Similar Existing Issues</h3>
+              <strong>Similar Complaints Found:</strong>
 
-              <div
-                style={{
-                  maxHeight: 200,
-                  overflowY: "auto",
-                }}
-              >
-                {suggestions.map((s) => (
-                  <div
-                    key={s.ticket_id}
-                    style={{
-                      border: "1px solid #ddd",
-                      padding: 10,
-                      marginBottom: 10,
-                      borderRadius: 6,
-                    }}
-                  >
-                    <strong>{s.title}</strong>
-                    <p>Priority: {s.priority}</p>
-                    <p>Reports: {s.report_count}</p>
-
-                    <button
-                      onClick={() => handleJoin(s.ticket_id)}
-                    >
-                      Join This Issue
-                    </button>
+              {suggestions.map((s) => (
+                <div
+                  key={s.ticket_id}
+                  style={{
+                    marginTop: 12,
+                    padding: 12,
+                    borderRadius: 12,
+                    background: "white",
+                    border: "1px solid #e5e7eb",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center"
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{s.title}</div>
+                    <div style={{ fontSize: 13, color: "#6b7280" }}>
+                      Reports: {s.report_count}
+                    </div>
                   </div>
-                ))}
-              </div>
+
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={() => handleJoin(s.ticket_id)}
+                  >
+                    Join
+                  </button>
+                </div>
+              ))}
             </div>
           )}
-        </div>
+
+          {/* SUBMIT NEW */}
+          <button
+            type="submit"
+            className="submit-btn-advanced"
+            disabled={loading}
+          >
+            {loading ? "Submitting..." : "Submit New Complaint"}
+          </button>
+
+        </form>
       </div>
-    </>
+    </div>
   );
 }
 
