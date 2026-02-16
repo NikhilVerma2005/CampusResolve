@@ -5,7 +5,7 @@ from models import db, User, Ticket, Report, TicketUpdate
 from routes.tickets import tickets_bp
 from routes.offices import offices_bp
 from routes.users import users_bp
-
+import os
 from routes.auth import auth_bp
 
 
@@ -39,4 +39,4 @@ app = create_app()
 
 if __name__ == "__main__":
     print("server start...")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
