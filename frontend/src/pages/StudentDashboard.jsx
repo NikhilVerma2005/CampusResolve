@@ -3,10 +3,11 @@ import StatsCards from "../components/StatsCards";
 import TopIssues from "../components/TopIssues";
 import CreateTicketModal from "../components/CreateTicketModal";
 import MyTickets from "../components/MyTickets";
+import "../App.css";
 
 function StudentDashboard() {
   const [showModal, setShowModal] = useState(false);
-  const [showMyTickets, setShowMyTickets] = useState(false);
+  const [showMyComplaints, setShowMyComplaints] = useState(false);
 
   const studentId = localStorage.getItem("userId");
   const role = localStorage.getItem("role");
@@ -16,11 +17,14 @@ function StudentDashboard() {
   }
 
   return (
-    <div style={{ padding: 30 }}>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <h1>Student Dashboard</h1>
+    <div className="dashboard-container">
+
+      {/* HEADER */}
+      <div className="dashboard-header">
+        <div className="dashboard-title">Student Portal</div>
 
         <button
+          className="logout-btn"
           onClick={() => {
             localStorage.clear();
             window.location.href = "/";
@@ -30,29 +34,58 @@ function StudentDashboard() {
         </button>
       </div>
 
-      <StatsCards studentId={studentId} />
+      <div className="dashboard-wrapper">
 
-      <div style={{ marginTop: 20 }}>
-        <button onClick={() => setShowModal(true)}>
-          + Create New Ticket
-        </button>{" "}
-        <button onClick={() => setShowMyTickets(!showMyTickets)}>
-          {showMyTickets ? "Hide My Tickets" : "View My Tickets"}
-        </button>
+        {/* STATS */}
+        <StatsCards studentId={studentId} />
+
+        {/* MAIN PANEL */}
+        <div className="section-card">
+
+          <div className="action-buttons">
+            <div>
+              <div className="section-title">My Complaints</div>
+              <p style={{ color: "#6b7280", marginTop: "-10px" }}>
+                View and manage all your submitted complaints
+              </p>
+            </div>
+
+            <button
+              className="primary-btn"
+              onClick={() => setShowModal(true)}
+            >
+              + Raise New Complaint
+            </button>
+          </div>
+
+          <button
+            className="secondary-btn"
+            onClick={() => setShowMyComplaints(!showMyComplaints)}
+            style={{ marginBottom: 20 }}
+          >
+            {showMyComplaints ? "Hide Complaints" : "View My Complaints"}
+          </button>
+
+          {showMyComplaints && (
+            <MyTickets studentId={studentId} />
+          )}
+
+        </div>
+
+        {/* TRENDING */}
+        <div className="section-card">
+          <div className="section-title">Trending Campus Complaints</div>
+          <TopIssues />
+        </div>
+
+        {showModal && (
+          <CreateTicketModal
+            studentId={studentId}
+            close={() => setShowModal(false)}
+          />
+        )}
+
       </div>
-
-      {showMyTickets && (
-        <MyTickets studentId={studentId} />
-      )}
-
-      <TopIssues />
-
-      {showModal && (
-        <CreateTicketModal
-          studentId={studentId}
-          close={() => setShowModal(false)}
-        />
-      )}
     </div>
   );
 }
