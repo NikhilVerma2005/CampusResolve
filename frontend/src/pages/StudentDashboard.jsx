@@ -2,15 +2,15 @@ import { useState } from "react";
 import StatsCards from "../components/StatsCards";
 import TopIssues from "../components/TopIssues";
 import CreateTicketModal from "../components/CreateTicketModal";
+import MyTickets from "../components/MyTickets";
 
 function StudentDashboard() {
   const [showModal, setShowModal] = useState(false);
+  const [showMyTickets, setShowMyTickets] = useState(false);
 
-  // ✅ Get user info from localStorage (set during login)
   const studentId = localStorage.getItem("userId");
   const role = localStorage.getItem("role");
 
-  // ✅ Protect route
   if (!studentId || role !== "STUDENT") {
     return <p>Unauthorized. Please login as Student.</p>;
   }
@@ -32,12 +32,18 @@ function StudentDashboard() {
 
       <StatsCards studentId={studentId} />
 
-      <button
-        onClick={() => setShowModal(true)}
-        style={{ marginTop: 20 }}
-      >
-        + Create New Ticket
-      </button>
+      <div style={{ marginTop: 20 }}>
+        <button onClick={() => setShowModal(true)}>
+          + Create New Ticket
+        </button>{" "}
+        <button onClick={() => setShowMyTickets(!showMyTickets)}>
+          {showMyTickets ? "Hide My Tickets" : "View My Tickets"}
+        </button>
+      </div>
+
+      {showMyTickets && (
+        <MyTickets studentId={studentId} />
+      )}
 
       <TopIssues />
 

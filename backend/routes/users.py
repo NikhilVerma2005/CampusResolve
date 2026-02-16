@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 from models import Ticket, Report
+from datetime import datetime
 
 users_bp = Blueprint(
     "users_bp",
@@ -37,3 +38,28 @@ def user_stats(user_id):
         "resolved": resolved_count,
         "rejected": rejected_count
     })
+
+# -- get own tickets ---
+@users_bp.route("/<int:user_id>/tickets", methods=["GET"])
+def get_user_tickets(user_id):
+    reports = Report.query.filter_by(student_id=user_id).all()
+
+    now = datetime.utcnow()
+    result = []
+
+    for r in reports:
+        t = Ticket.query.get(r.ticket_id)
+
+        result.append({
+            "ticket_id": t.id,
+            "title": t.title,
+            "description": r.description,
+            "location": t.location,
+            "priority": t.priority,
+            "status": t.status,
+            "due_at": t.due_at.isoformat(),
+            "is_overdue": t.due_at < now and t.status in ["OPEN", "IN_PROGRESS"],
+            "rejection_reason": t.rejection_reason   # ✅ Added this
+        })
+
+    return jsonify(result)
