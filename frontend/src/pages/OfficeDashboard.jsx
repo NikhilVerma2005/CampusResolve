@@ -70,7 +70,7 @@ function OfficeDashboard() {
       {/* HEADER */}
       <div className="dashboard-header">
         <div className="dashboard-title">
-          {officeName.replace("_", " ")} Office
+          {officeName.replace("_", " ")}
         </div>
 
         <button
