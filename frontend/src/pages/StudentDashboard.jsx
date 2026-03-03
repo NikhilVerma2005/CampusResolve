@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import API from "../api";
 import StatsCards from "../components/StatsCards";
 import TopIssues from "../components/TopIssues";
@@ -9,7 +9,7 @@ import "../App.css";
 function StudentDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [showMyComplaints, setShowMyComplaints] = useState(false);
-  const [tickets, setTickets] = useState(null);
+  const [tickets, setTickets] = useState([]);
   const [loadingTickets, setLoadingTickets] = useState(false);
 
   const studentId = localStorage.getItem("userId");
@@ -28,11 +28,24 @@ function StudentDashboard() {
       setTickets(res.data || []);
     } catch (err) {
       console.error(err);
-      setTickets([]);
     } finally {
       setLoadingTickets(false);
     }
   };
+
+  // 🔥 Fetch when complaints section is opened
+  useEffect(() => {
+    if (showMyComplaints) {
+      fetchTickets();
+    }
+  }, [showMyComplaints]);
+
+  // 🔥 Fetch again whenever modal closes
+  useEffect(() => {
+    if (!showModal && showMyComplaints) {
+      fetchTickets();
+    }
+  }, [showModal]);
 
   return (
     <div className="dashboard-container">
@@ -72,14 +85,7 @@ function StudentDashboard() {
 
           <button
             className="secondary-btn"
-            onClick={async () => {
-              const newState = !showMyComplaints;
-              setShowMyComplaints(newState);
-
-              if (newState) {
-                await fetchTickets();
-              }
-            }}
+            onClick={() => setShowMyComplaints(!showMyComplaints)}
             style={{ marginBottom: 20 }}
           >
             {showMyComplaints ? "Hide Complaints" : "View My Complaints"}
@@ -102,7 +108,6 @@ function StudentDashboard() {
           <CreateTicketModal
             studentId={studentId}
             close={() => setShowModal(false)}
-            refreshTickets={fetchTickets}
           />
         )}
       </div>
