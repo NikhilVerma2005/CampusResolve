@@ -352,6 +352,7 @@ body {
 }
 
 /* Stats responsive grid */
+/* Responsive grid ONLY */
 @media (max-width: 1200px) {
   .stats-row {
     grid-template-columns: repeat(3, 1fr);
@@ -416,4 +417,32 @@ body {
   .progress-bar {
     width: 200px;
   }
+}
+
+
+/* FORCE ORIGINAL BUTTON STYLES (prevent override) */
+
+.primary-btn {
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.secondary-btn {
+  background: white !important;
+  border: 1px solid #d1d5db !important;
+  color: #111827 !important;
+}
+
+
+/* FORCE STAT ICON COLORS */
+
+.stat-circle {
+  border-width: 2px !important;
+}
+
+.stat-dot {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
 }
