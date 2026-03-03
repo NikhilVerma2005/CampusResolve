@@ -13,38 +13,49 @@ function App() {
 
   useEffect(() => {
     const wakeServer = async () => {
-      // Start timer — only show loader after 2 seconds
-      const timer = setTimeout(() => {
-        setShowLoader(true);
-      }, 2000);
+      let loaderTimer;
 
       try {
-        const res = await fetch(`${API_URL}/health`);
-        if (res.ok) {
-          clearTimeout(timer);
+        // Start health check
+        const healthRequest = fetch(`${API_URL}/health`);
+
+        // Start delayed loader (3 seconds threshold)
+        loaderTimer = setTimeout(() => {
+          setShowLoader(true);
+        }, 3000);
+
+        const response = await healthRequest;
+
+        clearTimeout(loaderTimer);
+
+        if (response.ok) {
           setServerReady(true);
+          return;
         }
       } catch (err) {
         setShowLoader(true);
+      }
 
-        // Retry if sleeping
-        let ready = false;
-        while (!ready) {
-          try {
-            const retry = await fetch(`${API_URL}/health`);
-            if (retry.ok) {
-              ready = true;
-              setServerReady(true);
-            }
-          } catch {}
-          await new Promise((r) => setTimeout(r, 10000));
-        }
+      // If we reach here → server likely sleeping
+      let ready = false;
+
+      while (!ready) {
+        try {
+          const retry = await fetch(`${API_URL}/health`);
+          if (retry.ok) {
+            ready = true;
+            setServerReady(true);
+          }
+        } catch {}
+
+        await new Promise((r) => setTimeout(r, 8000));
       }
     };
 
     wakeServer();
   }, []);
 
+  // Show loader ONLY if server is slow
   if (!serverReady && showLoader) {
     return (
       <div className="loading-container">
@@ -60,7 +71,8 @@ function App() {
     );
   }
 
-  if (!serverReady) return null; // Don't flash loader
+  // If checking but fast → render nothing (no flash)
+  if (!serverReady) return null;
 
   return (
     <Routes>
