@@ -4,17 +4,38 @@ import TimelineModal from "./TimelineModal";
 import "../App.css";
 
 function MyTickets({ studentId }) {
-  const [tickets, setTickets] = useState([]);
+  const [tickets, setTickets] = useState(null); // null = not loaded yet
+  const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [ascending, setAscending] = useState(false);
 
   useEffect(() => {
     if (!studentId) return;
 
-    API.get(`/users/${studentId}/tickets`)
-      .then(res => setTickets(res.data || []))
-      .catch(err => console.error(err));
+    const fetchTickets = async () => {
+      try {
+        const res = await API.get(`/users/${studentId}/tickets`);
+        setTickets(res.data || []);
+      } catch (err) {
+        console.error(err);
+        setTickets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTickets();
   }, [studentId]);
+
+  // 🔹 Loading state
+  if (loading) {
+    return <p style={{ marginTop: 20 }}>Loading complaints...</p>;
+  }
+
+  // 🔹 Empty state (only after loaded)
+  if (tickets && tickets.length === 0) {
+    return <p style={{ marginTop: 20 }}>No complaints raised yet.</p>;
+  }
 
   const sortedTickets = [...tickets].sort((a, b) => {
     const timeA = new Date(a.due_at).getTime();
@@ -22,20 +43,16 @@ function MyTickets({ studentId }) {
     return ascending ? timeA - timeB : timeB - timeA;
   });
 
-  if (tickets.length === 0) {
-    return <p style={{ marginTop: 20 }}>No complaints raised yet.</p>;
-  }
-
   return (
     <div style={{ marginTop: 30 }}>
-
-      {/* Header */}
-      <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 25
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 25
+        }}
+      >
         <h2 style={{ margin: 0 }}>My Complaints</h2>
 
         <button
@@ -49,7 +66,7 @@ function MyTickets({ studentId }) {
         </button>
       </div>
 
-      {sortedTickets.map(t => (
+      {sortedTickets.map((t) => (
         <div
           key={t.ticket_id}
           style={{
@@ -62,13 +79,13 @@ function MyTickets({ studentId }) {
             transition: "0.2s ease"
           }}
         >
-
-          {/* Title + Badges */}
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}
+          >
             <h3 style={{ margin: 0 }}>{t.title}</h3>
 
             <div style={{ display: "flex", gap: 8 }}>
@@ -77,7 +94,6 @@ function MyTickets({ studentId }) {
             </div>
           </div>
 
-          {/* Details */}
           <p style={{ marginTop: 14 }}>
             <strong>Description:</strong> {t.description}
           </p>
@@ -87,11 +103,9 @@ function MyTickets({ studentId }) {
           </p>
 
           <p>
-            <strong>Due:</strong>{" "}
-            {new Date(t.due_at).toLocaleString()}
+            <strong>Due:</strong> {new Date(t.due_at).toLocaleString()}
           </p>
 
-          {/* Rejection Reason */}
           {t.status === "REJECTED" && t.rejection_reason && (
             <div
               style={{
@@ -107,14 +121,12 @@ function MyTickets({ studentId }) {
             </div>
           )}
 
-          {/* Overdue */}
           {t.is_overdue && (
             <p style={{ color: "#ef4444", marginTop: 10 }}>
               ⚠ Complaint overdue
             </p>
           )}
 
-          {/* Actions */}
           <div style={{ marginTop: 18 }}>
             <button
               className="secondary-btn"
@@ -123,7 +135,6 @@ function MyTickets({ studentId }) {
               View Timeline
             </button>
           </div>
-
         </div>
       ))}
 
@@ -136,10 +147,6 @@ function MyTickets({ studentId }) {
     </div>
   );
 }
-
-/* ========================= */
-/* BADGE COMPONENT */
-/* ========================= */
 
 function Badge({ label, type }) {
   let bg = "#9ca3af";
