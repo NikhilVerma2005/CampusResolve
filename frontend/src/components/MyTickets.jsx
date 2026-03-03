@@ -55,6 +55,7 @@ function MyTickets({ tickets, loading }) {
             boxShadow: "0 8px 24px rgba(0,0,0,0.05)"
           }}
         >
+          {/* Title + Badges */}
           <div
             style={{
               display: "flex",
@@ -63,6 +64,11 @@ function MyTickets({ tickets, loading }) {
             }}
           >
             <h3 style={{ margin: 0 }}>{t.title}</h3>
+
+            <div style={{ display: "flex", gap: 8 }}>
+              <Badge label={t.priority} type="priority" />
+              <Badge label={t.status} type="status" />
+            </div>
           </div>
 
           <p style={{ marginTop: 14 }}>
@@ -76,6 +82,27 @@ function MyTickets({ tickets, loading }) {
           <p>
             <strong>Due:</strong> {new Date(t.due_at).toLocaleString()}
           </p>
+
+          {t.status === "REJECTED" && t.rejection_reason && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 14,
+                borderRadius: 12,
+                background: "#fef2f2",
+                border: "1px solid #fecaca",
+                color: "#b91c1c"
+              }}
+            >
+              <strong>Rejection Reason:</strong> {t.rejection_reason}
+            </div>
+          )}
+
+          {t.is_overdue && (
+            <p style={{ color: "#ef4444", marginTop: 10 }}>
+              ⚠ Complaint overdue
+            </p>
+          )}
 
           <div style={{ marginTop: 18 }}>
             <button
@@ -95,6 +122,38 @@ function MyTickets({ tickets, loading }) {
         />
       )}
     </div>
+  );
+}
+
+function Badge({ label, type }) {
+  let bg = "#9ca3af";
+
+  if (type === "priority") {
+    if (label === "HIGH") bg = "#ef4444";
+    else if (label === "MEDIUM") bg = "#f59e0b";
+    else bg = "#6b7280";
+  }
+
+  if (type === "status") {
+    if (label === "OPEN") bg = "#f59e0b";
+    else if (label === "IN_PROGRESS") bg = "#3b82f6";
+    else if (label === "RESOLVED") bg = "#10b981";
+    else if (label === "REJECTED") bg = "#ef4444";
+  }
+
+  return (
+    <span
+      style={{
+        background: bg,
+        color: "white",
+        padding: "6px 12px",
+        borderRadius: 10,
+        fontSize: 12,
+        fontWeight: 600
+      }}
+    >
+      {label}
+    </span>
   );
 }
 
