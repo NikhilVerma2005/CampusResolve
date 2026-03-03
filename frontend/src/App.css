@@ -494,7 +494,7 @@ body {
 }
 
 
-/* <--------- bike animation -------> */
+/* <--------- namaste animation -------> */
 
  
  .loading-container {
@@ -503,38 +503,36 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-  font-family: 'Segoe UI', sans-serif;
-  color: #1e293b;
+  background: #0f172a;
+  color: white;
+  font-family: sans-serif;
 }
 
-.namaste {
-  font-size: 3.5rem;
-  font-weight: bold;
-  margin-bottom: 25px;
-  animation: wave 1.5s ease-in-out infinite;
-  color: #2563eb;
+.bike {
+  font-size: 3rem;
+  animation: moveBike 2s linear infinite;
+  margin-bottom: 20px;
 }
 
-@keyframes wave {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
-  100% { transform: translateY(0px); }
+@keyframes moveBike {
+  0% { transform: translateX(-40px); }
+  50% { transform: translateX(40px); }
+  100% { transform: translateX(-40px); }
 }
 
 .progress-bar {
-  width: 260px;
+  width: 250px;
   height: 6px;
-  background: #cbd5e1;
+  background: #1e293b;
   border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .progress {
   width: 40%;
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  background: linear-gradient(90deg, #38bdf8, #6366f1);
   animation: loading 1.5s infinite;
 }
 
@@ -544,6 +542,6 @@ body {
 }
 
 .small-text {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   opacity: 0.7;
 }
