@@ -6,7 +6,7 @@ import Signup from "./pages/Signup";
 import StudentDashboard from "./pages/StudentDashboard";
 import OfficeDashboard from "./pages/OfficeDashboard";
 
-const API_URL = "http://127.0.0.1:5000"; 
+const API_URL = "https://campusresolve-05m5.onrender.com"; 
 
 function App() {
   const [serverReady, setServerReady] = useState(false);
@@ -35,14 +35,6 @@ function App() {
     wakeServer();
   }, []);
 
-  // if (!serverReady) {
-  //   return (
-  //     <div style={{ textAlign: "center", marginTop: "20%" }}>
-  //       <h2>Server is waking up...</h2>
-  //       <p>This may take up to 1 minute (free hosting).</p>
-  //     </div>
-  //   );
-  // }
 
   if (!serverReady) {
   return (
