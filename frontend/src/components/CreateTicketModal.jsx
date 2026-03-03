@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import API from "../api";
 import "../App.css";
 
-function CreateTicketModal({ studentId, close }) {
+function CreateTicketModal({ studentId, close, refreshTickets }) {
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
@@ -51,6 +51,9 @@ function CreateTicketModal({ studentId, close }) {
         student_id: studentId,
       });
 
+      // 🔥 refresh parent tickets
+      await refreshTickets();
+
       close();
     } catch (err) {
       alert("Failed to submit complaint");
@@ -70,7 +73,7 @@ function CreateTicketModal({ studentId, close }) {
         description: description || "Joined existing complaint",
       });
 
-      alert("Successfully joined existing complaint");
+      await refreshTickets();  // 🔥 refresh parent
       close();
     } catch (err) {
       alert(err.response?.data?.error || "Join failed");
@@ -80,8 +83,6 @@ function CreateTicketModal({ studentId, close }) {
   return (
     <div className="modal-overlay">
       <div className="modal-card-advanced">
-
-        {/* HEADER */}
         <div className="modal-header">
           <div>
             <h2 className="modal-title">Raise a Complaint</h2>
@@ -93,8 +94,6 @@ function CreateTicketModal({ studentId, close }) {
         </div>
 
         <form onSubmit={handleSubmit}>
-
-          {/* TITLE */}
           <div className="form-group">
             <label>Complaint Title *</label>
             <input
@@ -106,7 +105,6 @@ function CreateTicketModal({ studentId, close }) {
             />
           </div>
 
-          {/* LOCATION */}
           <div className="form-group">
             <label>Location *</label>
             <select
@@ -125,7 +123,6 @@ function CreateTicketModal({ studentId, close }) {
             </select>
           </div>
 
-          {/* DESCRIPTION */}
           <div className="form-group">
             <label>Description *</label>
             <textarea
@@ -137,7 +134,6 @@ function CreateTicketModal({ studentId, close }) {
             />
           </div>
 
-          {/* SUGGESTIONS WITH JOIN */}
           {suggestions.length > 0 && (
             <div
               style={{
@@ -185,7 +181,6 @@ function CreateTicketModal({ studentId, close }) {
             </div>
           )}
 
-          {/* SUBMIT NEW */}
           <button
             type="submit"
             className="submit-btn-advanced"
@@ -193,7 +188,6 @@ function CreateTicketModal({ studentId, close }) {
           >
             {loading ? "Submitting..." : "Submit New Complaint"}
           </button>
-
         </form>
       </div>
     </div>

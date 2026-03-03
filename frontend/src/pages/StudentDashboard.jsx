@@ -1,4 +1,5 @@
 import { useState } from "react";
+import API from "../api";
 import StatsCards from "../components/StatsCards";
 import TopIssues from "../components/TopIssues";
 import CreateTicketModal from "../components/CreateTicketModal";
@@ -8,6 +9,8 @@ import "../App.css";
 function StudentDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [showMyComplaints, setShowMyComplaints] = useState(false);
+  const [tickets, setTickets] = useState(null);
+  const [loadingTickets, setLoadingTickets] = useState(false);
 
   const studentId = localStorage.getItem("userId");
   const role = localStorage.getItem("role");
@@ -16,10 +19,23 @@ function StudentDashboard() {
     return <p>Unauthorized. Please login as Student.</p>;
   }
 
+  const fetchTickets = async () => {
+    if (!studentId) return;
+
+    setLoadingTickets(true);
+    try {
+      const res = await API.get(`/users/${studentId}/tickets`);
+      setTickets(res.data || []);
+    } catch (err) {
+      console.error(err);
+      setTickets([]);
+    } finally {
+      setLoadingTickets(false);
+    }
+  };
+
   return (
     <div className="dashboard-container">
-
-      {/* HEADER */}
       <div className="dashboard-header">
         <div className="dashboard-title">Student Portal</div>
 
@@ -35,13 +51,9 @@ function StudentDashboard() {
       </div>
 
       <div className="dashboard-wrapper">
-
-        {/* STATS */}
         <StatsCards studentId={studentId} />
 
-        {/* MAIN PANEL */}
         <div className="section-card">
-
           <div className="action-buttons">
             <div>
               <div className="section-title">My Complaints</div>
@@ -60,19 +72,27 @@ function StudentDashboard() {
 
           <button
             className="secondary-btn"
-            onClick={() => setShowMyComplaints(!showMyComplaints)}
+            onClick={async () => {
+              const newState = !showMyComplaints;
+              setShowMyComplaints(newState);
+
+              if (newState) {
+                await fetchTickets();
+              }
+            }}
             style={{ marginBottom: 20 }}
           >
             {showMyComplaints ? "Hide Complaints" : "View My Complaints"}
           </button>
 
           {showMyComplaints && (
-            <MyTickets studentId={studentId} />
+            <MyTickets
+              tickets={tickets}
+              loading={loadingTickets}
+            />
           )}
-
         </div>
 
-        {/* TRENDING */}
         <div className="section-card">
           <div className="section-title">Trending Campus Complaints</div>
           <TopIssues />
@@ -82,9 +102,9 @@ function StudentDashboard() {
           <CreateTicketModal
             studentId={studentId}
             close={() => setShowModal(false)}
+            refreshTickets={fetchTickets}
           />
         )}
-
       </div>
     </div>
   );
