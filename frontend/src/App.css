@@ -496,44 +496,45 @@ body {
 
 /* <--------- namaste animation -------> */
 
- 
- .loading-container {
+.loading-container {
   height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: #cad6f0;
-  color: white;
-  font-family: sans-serif;
+  background: #eef2ff;
+  color: #1e293b;
+  font-family: 'Noto Sans', sans-serif;
+  text-align: center;
 }
 
-.bike {
-  font-size: 3rem;
-  animation: moveBike 2s linear infinite;
-  margin-bottom: 20px;
+.namaste {
+  font-size: 3.2rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  animation: moveNamaste 2s ease-in-out infinite;
 }
 
-@keyframes moveBike {
-  0% { transform: translateX(-40px); }
-  50% { transform: translateX(40px); }
-  100% { transform: translateX(-40px); }
+@keyframes moveNamaste {
+  0% { transform: translateX(-30px); }
+  50% { transform: translateX(30px); }
+  100% { transform: translateX(-30px); }
 }
 
 .progress-bar {
-  width: 250px;
+  width: 260px;
   height: 6px;
-  background: #1e293b;
+  background: #cbd5f5;
   border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .progress {
   width: 40%;
   height: 100%;
-  background: linear-gradient(90deg, #38bdf8, #6366f1);
-  animation: loading 1.5s infinite;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  animation: loading 1.4s infinite;
 }
 
 @keyframes loading {
@@ -542,6 +543,6 @@ body {
 }
 
 .small-text {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   opacity: 0.7;
 }
