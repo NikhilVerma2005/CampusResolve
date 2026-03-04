@@ -52,7 +52,9 @@ function CreateTicketModal({ studentId, close, refreshTickets }) {
       });
 
       // 🔥 refresh parent tickets
-      await refreshTickets();
+      if (refreshTickets) {
+        await refreshTickets();
+      }
 
       close();
     } catch (err) {
@@ -73,7 +75,9 @@ function CreateTicketModal({ studentId, close, refreshTickets }) {
         description: description || "Joined existing complaint",
       });
 
-      await refreshTickets();  // 🔥 refresh parent
+      if (refreshTickets) {   // 🔥 refresh parent
+        await refreshTickets();
+      }  
       close();
     } catch (err) {
       alert(err.response?.data?.error || "Join failed");
